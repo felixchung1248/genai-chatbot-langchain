@@ -108,7 +108,7 @@ def genAiResponse():
    ##    print(json_array)
    ##except ValueError:
    ##    return "Invalid JSON", 400
-   ##result = agent_executor.run("Could you provide some meaningful figures and tell me how to get those figures?")
+    result = agent_executor.run("Could you provide some meaningful figures and tell me how to get those figures?")
     return result
 
 if __name__ == '__main__':
