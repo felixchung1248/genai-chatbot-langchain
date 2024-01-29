@@ -1,0 +1,4 @@
+apiVersion: v2
+name: langchain-chatbot
+description: A Helm chart for a service to respond result based on human language input
+version: 0.1.0
