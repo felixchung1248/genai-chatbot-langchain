@@ -103,12 +103,12 @@ agent_executor = create_spark_sql_agent(llm=llm, toolkit=toolkit, verbose=False)
 @app.route('/genai-response', methods=['POST'])
 def genAiResponse():
     # Get the JSON from the POST request body
-    try:
-        json_array = request.get_json()
-        print(json_array)
-    except ValueError:
-        return "Invalid JSON", 400
-    result = agent_executor.run("Could you provide some meaningful figures and tell me how to get those figures?")
+   ##try:
+   ##    json_array = request.get_json()
+   ##    print(json_array)
+   ##except ValueError:
+   ##    return "Invalid JSON", 400
+   ##result = agent_executor.run("Could you provide some meaningful figures and tell me how to get those figures?")
     return result
 
 if __name__ == '__main__':
