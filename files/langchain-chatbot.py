@@ -96,7 +96,7 @@ else:
     print(f"Failed to fetch data: {response.status_code} {response.reason}")
 
 spark_sql = SparkSQL(schema=schema)
-llm = ChatOpenAI(model="gpt-4-turbo-preview",temperature=0,api_key="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")
+llm = ChatOpenAI(model="gpt-4-turbo-preview",temperature=0,api_key="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")
 toolkit = SparkSQLToolkit(db=spark_sql, llm=llm)
 agent_executor = create_spark_sql_agent(llm=llm, toolkit=toolkit, verbose=False)
 
