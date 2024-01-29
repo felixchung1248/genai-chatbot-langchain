@@ -23,6 +23,12 @@ spec:
           args: ["/usr/src/app/langchain-chatbot.py"]
           ports:
             - containerPort: {{ .Values.service.port }}
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                    name: openai-secret # The name of the Kubernetes Secret
+                    key: openai-key # Key in the secret data
       volumes:
         - name: python-script-volume
           configMap:
