@@ -111,13 +111,25 @@ def genAiResponse():
         return "Invalid JSON", 400
     try:       
         result = agent_executor.run(msg)
-    except (exceptions.OutputParserException, ValueError) as e:
-        result = str(e)
-        print(f"Troubleshooting: {result}")
-        if not result.startswith("Could not parse LLM output: `"):
-            raise e
-        result = result.removeprefix("Could not parse LLM output: `").removesuffix("`")
-    return result
+        return result
+    except exceptions.OutputParserException as e:
+        # Handle the specific OutputParserException
+        error_message = str(e)
+        print(f"OutputParserException caught: {error_message}")
+        # Extract meaningful error message if it matches the expected pattern
+        if error_message.startswith("Could not parse LLM output: `"):
+            error_message = error_message.removeprefix("Could not parse LLM output: `").removesuffix("`")
+        #return jsonify({"error": "Output parsing error", "details": error_message}), 500
+    except ValueError as e:
+        # Handle any other ValueError that might be related to parsing
+        error_message = str(e)
+        print(f"ValueError caught: {error_message}")
+        #return jsonify({"error": "ValueError", "details": error_message}), 500
+    except Exception as e:
+        # General exception handler for any unexpected exceptions
+        error_message = str(e)
+        print(f"Unexpected error caught: {error_message}")
+        #return jsonify({"error": "Unexpected error", "details": error_message}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5201)
