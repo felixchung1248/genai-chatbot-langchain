@@ -13,6 +13,8 @@ service:
 ingress:
   enabled: true
   pathPrefix: /genai-response
-  # annotations, hosts, and other configurations go here
-
+  proxy-connect-timeout: 300
+  proxy-send-timeout: 300
+  proxy-read-timeout: 300
+  
 resources: {}
