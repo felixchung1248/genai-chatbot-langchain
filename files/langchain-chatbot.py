@@ -110,7 +110,7 @@ def genAiResponse():
         return "Invalid JSON", 400
     try:       
         result = agent_executor.run(msg)
-    except ValueError as e:
+    except OutputParserException as e:
         result = str(e)
         if not result.startswith("Could not parse LLM output: `"):
             raise e
