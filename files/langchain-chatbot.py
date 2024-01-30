@@ -15,6 +15,7 @@ from langchain_community.agent_toolkits import SparkSQLToolkit
 from langchain_community.utilities.spark_sql import SparkSQL
 from langchain_openai import ChatOpenAI
 from langchain_core import exceptions
+import re
 
 #----------------------------------
 # Setup
@@ -124,6 +125,14 @@ def genAiResponse():
         # Handle any other ValueError that might be related to parsing
         error_message = str(e)
         print(f"ValueError caught: {error_message}", flush=True)
+        match = re.search(r"Could not parse LLM output: `([^`]*)`", error_message)
+
+        # Check if we found a match
+        if match:
+            extracted_message = match.group(1)  # This is "I don't know"
+            return(extracted_message)
+        else:
+            return("I don't know")
         #return jsonify({"error": "ValueError", "details": error_message}), 500
     except Exception as e:
         # General exception handler for any unexpected exceptions
