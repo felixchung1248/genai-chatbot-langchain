@@ -113,7 +113,7 @@ def genAiResponse():
         result = agent_executor.run(msg)
     except (exceptions.OutputParserException, ValueError) as e:
         result = str(e)
-        print(result)
+        print(f"Troubleshooting: {result}")
         if not result.startswith("Could not parse LLM output: `"):
             raise e
         result = result.removeprefix("Could not parse LLM output: `").removesuffix("`")
