@@ -99,7 +99,7 @@ else:
 spark_sql = SparkSQL(schema=schema)
 llm = ChatOpenAI(model="gpt-4-turbo-preview",temperature=0)
 toolkit = SparkSQLToolkit(db=spark_sql, llm=llm)
-agent_executor = create_spark_sql_agent(llm=llm, toolkit=toolkit, verbose=False,handle_parsing_errors=True)
+agent_executor = create_spark_sql_agent(llm=llm, toolkit=toolkit, verbose=True,handle_parsing_errors="Check your output and make sure it conforms, use the Action/Action Input syntax")
 
 @app.route('/genai-response', methods=['POST'])
 def genAiResponse():
