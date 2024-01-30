@@ -115,7 +115,7 @@ def genAiResponse():
     except exceptions.OutputParserException as e:
         # Handle the specific OutputParserException
         error_message = str(e)
-        print(f"OutputParserException caught: {error_message}")
+        print(f"OutputParserException caught: {error_message}", flush=True)
         # Extract meaningful error message if it matches the expected pattern
         if error_message.startswith("Could not parse LLM output: `"):
             error_message = error_message.removeprefix("Could not parse LLM output: `").removesuffix("`")
@@ -123,12 +123,12 @@ def genAiResponse():
     except ValueError as e:
         # Handle any other ValueError that might be related to parsing
         error_message = str(e)
-        print(f"ValueError caught: {error_message}")
+        print(f"ValueError caught: {error_message}", flush=True)
         #return jsonify({"error": "ValueError", "details": error_message}), 500
     except Exception as e:
         # General exception handler for any unexpected exceptions
         error_message = str(e)
-        print(f"Unexpected error caught: {error_message}")
+        print(f"Unexpected error caught: {error_message}", flush=True)
         #return jsonify({"error": "Unexpected error", "details": error_message}), 500
 
 if __name__ == '__main__':
