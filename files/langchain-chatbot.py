@@ -14,6 +14,7 @@ from langchain.agents import create_spark_sql_agent
 from langchain_community.agent_toolkits import SparkSQLToolkit
 from langchain_community.utilities.spark_sql import SparkSQL
 from langchain_openai import ChatOpenAI
+from langchain_core import exceptions
 
 #----------------------------------
 # Setup
@@ -110,7 +111,7 @@ def genAiResponse():
         return "Invalid JSON", 400
     try:       
         result = agent_executor.run(msg)
-    except OutputParserException as e:
+    except exceptions.OutputParserException as e:
         result = str(e)
         print(result)
         if not result.startswith("Could not parse LLM output: `"):
