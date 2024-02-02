@@ -27,7 +27,9 @@ spark = SparkSession.builder \
     .appName("DremioToSparkSQLExample") \
     .getOrCreate()
 schema = "langchain_example"
-
+spark.sql(f"CREATE DATABASE IF NOT EXISTS {schema}")
+spark.sql(f"USE {schema}")      
+        
 token = os.environ['DREMIO_PROD_KEY']
 
 ## Headers for Authentication
@@ -37,6 +39,47 @@ headers = [
 
 ## Create Client
 client = FlightClient(location=("grpc+tls://data.dremio.cloud:443"))
+
+# The API endpoint you want to call
+url = 'http://datamgmtdemo01.eastasia.cloudapp.azure.com/listalldatasets?env=PROD'
+# Perform the GET request
+response = requests.get(url)
+
+# Check if the request was successful
+if response.status_code == 200:
+    # Parse the response JSON content
+    data = response.json()
+    result_array = []
+
+    for path in data:
+        lastField = path.split("/")[-1]
+        path = convert_to_quoted_path(path)
+        #----------------------------------
+        # Run Query
+        #----------------------------------
+
+        ## Query Dremio, get back Arrow FlightStreamReader
+        print(f"Making query for {path}")
+        results = make_query(
+        f"""
+        SELECT * FROM {path}; 
+        """
+        , client, headers)
+
+        print(f"Fetching result for {path}")
+        ## Convert StreamReader into an Arrow Table
+        table = results.read_all()
+        sdf = spark.createDataFrame(table.to_pandas())
+        # Create a temporary view to run Spark SQL queries
+        sdf.write.saveAsTable(lastField)
+
+else:
+    print(f"Failed to fetch data: {response.status_code} {response.reason}")
+    
+spark_sql = SparkSQL(schema=schema)
+llm = ChatOpenAI(model="gpt-4-turbo-preview",temperature=0)
+toolkit = SparkSQLToolkit(db=spark_sql, llm=llm)
+agent_executor = create_spark_sql_agent(llm=llm, toolkit=toolkit, verbose=True,handle_parsing_errors=True) 
 
 def convert_to_quoted_path(path):
     # Split the path by slashes and quote each part
@@ -62,53 +105,10 @@ def make_query(query, client, headers):
 @app.route('/genai-response', methods=['POST'])
 def genAiResponse():
     # Get the JSON from the POST request body
-    try:
-        spark.sql(f"CREATE DATABASE IF NOT EXISTS {schema}")
-        spark.sql(f"USE {schema}")
+    try:       
         json_array = request.get_json()
-        msg = json_array.get('msg')
-        # The API endpoint you want to call
-        url = 'http://datamgmtdemo01.eastasia.cloudapp.azure.com/listalldatasets?env=PROD'
-        # Perform the GET request
-        response = requests.get(url)
-        
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Parse the response JSON content
-            data = response.json()
-            result_array = []
-        
-            for path in data:
-                lastField = path.split("/")[-1]
-                path = convert_to_quoted_path(path)
-                #----------------------------------
-                # Run Query
-                #----------------------------------
-        
-                ## Query Dremio, get back Arrow FlightStreamReader
-                print(f"Making query for {path}")
-                results = make_query(
-                f"""
-                SELECT * FROM {path}; 
-                """
-                , client, headers)
-        
-                print(f"Fetching result for {path}")
-                ## Convert StreamReader into an Arrow Table
-                table = results.read_all()
-                sdf = spark.createDataFrame(table.to_pandas())
-                # Create a temporary view to run Spark SQL queries
-                sdf.write.saveAsTable(lastField)
-        
-        else:
-            print(f"Failed to fetch data: {response.status_code} {response.reason}")
-        
-        spark_sql = SparkSQL(schema=schema)
-        llm = ChatOpenAI(model="gpt-4-turbo-preview",temperature=0)
-        toolkit = SparkSQLToolkit(db=spark_sql, llm=llm)
-        agent_executor = create_spark_sql_agent(llm=llm, toolkit=toolkit, verbose=True,handle_parsing_errors=True)       
+        msg = json_array.get('msg')       
         result = agent_executor.run(msg)
-        spark.sql(f"DROP DATABASE {schema} CASCADE")
         return result
     except exceptions.OutputParserException as e:
         # Handle the specific OutputParserException
