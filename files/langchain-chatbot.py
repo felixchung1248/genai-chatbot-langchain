@@ -27,8 +27,6 @@ spark = SparkSession.builder \
     .appName("DremioToSparkSQLExample") \
     .getOrCreate()
 schema = "langchain_example"
-spark.sql(f"CREATE DATABASE IF NOT EXISTS {schema}")
-spark.sql(f"USE {schema}")
 
 token = os.environ['DREMIO_PROD_KEY']
 
@@ -65,6 +63,8 @@ def make_query(query, client, headers):
 def genAiResponse():
     # Get the JSON from the POST request body
     try:
+        spark.sql(f"CREATE DATABASE IF NOT EXISTS {schema}")
+        spark.sql(f"USE {schema}")
         json_array = request.get_json()
         msg = json_array.get('msg')
         # The API endpoint you want to call
