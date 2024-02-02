@@ -29,6 +29,11 @@ spec:
                 secretKeyRef:
                     name: openai-secret # The name of the Kubernetes Secret
                     key: openai-key # Key in the secret data
+            - name: DREMIO_PROD_KEY
+              valueFrom:
+                secretKeyRef:
+                    name: dremio-prod-secret
+                    key: prod_key
       volumes:
         - name: python-script-volume
           configMap:

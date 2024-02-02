@@ -16,6 +16,7 @@ from langchain_community.utilities.spark_sql import SparkSQL
 from langchain_openai import ChatOpenAI
 from langchain_core import exceptions
 import re
+import os
 
 #----------------------------------
 # Setup
@@ -29,7 +30,7 @@ schema = "langchain_example"
 spark.sql(f"CREATE DATABASE IF NOT EXISTS {schema}")
 spark.sql(f"USE {schema}")
 
-token = "oeJVCon5ROWqlIAcwbV3xpm3O/WiuJ2A9SZRuVyKMcR2ytURfAVg3EYR8o3qFA=="
+token = os.environ['DREMIO_PROD_KEY']
 
 ## Headers for Authentication
 headers = [
