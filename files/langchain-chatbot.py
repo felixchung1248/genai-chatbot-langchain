@@ -22,6 +22,29 @@ import os
 # Setup
 #----------------------------------
 app = Flask(__name__)
+
+def convert_to_quoted_path(path):
+    # Split the path by slashes and quote each part
+    parts = path.split('/')
+    quoted_parts = ['"{}"'.format(part) for part in parts]
+    # Join the quoted parts with periods
+    quoted_path = '.'.join(quoted_parts)
+    return quoted_path
+
+def make_query(query, client, headers):
+    ## Get Schema Description and build headers
+    flight_desc = flight.FlightDescriptor.for_command(query)
+    options = flight.FlightCallOptions(headers=headers)
+    schema = client.get_schema(flight_desc, options)
+
+    ## Get ticket to for query execution, used to get results
+    flight_info = client.get_flight_info(flight.FlightDescriptor.for_command(query), options)
+    
+    ## Get Results 
+    results = client.do_get(flight_info.endpoints[0].ticket, options)
+    return results
+
+
 # Initialize Spark session
 spark = SparkSession.builder \
     .appName("DremioToSparkSQLExample") \
@@ -80,27 +103,6 @@ spark_sql = SparkSQL(schema=schema)
 llm = ChatOpenAI(model="gpt-4-turbo-preview",temperature=0)
 toolkit = SparkSQLToolkit(db=spark_sql, llm=llm)
 agent_executor = create_spark_sql_agent(llm=llm, toolkit=toolkit, verbose=True,handle_parsing_errors=True) 
-
-def convert_to_quoted_path(path):
-    # Split the path by slashes and quote each part
-    parts = path.split('/')
-    quoted_parts = ['"{}"'.format(part) for part in parts]
-    # Join the quoted parts with periods
-    quoted_path = '.'.join(quoted_parts)
-    return quoted_path
-
-def make_query(query, client, headers):
-    ## Get Schema Description and build headers
-    flight_desc = flight.FlightDescriptor.for_command(query)
-    options = flight.FlightCallOptions(headers=headers)
-    schema = client.get_schema(flight_desc, options)
-
-    ## Get ticket to for query execution, used to get results
-    flight_info = client.get_flight_info(flight.FlightDescriptor.for_command(query), options)
-    
-    ## Get Results 
-    results = client.do_get(flight_info.endpoints[0].ticket, options)
-    return results
 
 @app.route('/genai-response', methods=['POST'])
 def genAiResponse():
