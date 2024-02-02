@@ -108,7 +108,7 @@ def genAiResponse():
         toolkit = SparkSQLToolkit(db=spark_sql, llm=llm)
         agent_executor = create_spark_sql_agent(llm=llm, toolkit=toolkit, verbose=True,handle_parsing_errors=True)       
         result = agent_executor.run(msg)
-        spark.sql(f"DROP DATABASE IF NOT EXISTS {schema}")
+        spark.sql(f"DROP DATABASE {schema}")
         return result
     except exceptions.OutputParserException as e:
         # Handle the specific OutputParserException
